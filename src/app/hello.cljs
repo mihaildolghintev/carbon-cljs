@@ -1,17 +1,33 @@
 (ns app.hello
-  (:require [reagent.core :as r]))
+  (:require 
+            [app.components.checkbox :as checkbox]
+            [app.components.dropdown :as dropdown]
+            [app.components.file-uploader :as file-uploader]
+            
+            [reagent.core :as r]))
 
-(defn click-counter [click-count]
-  [:div
-   "The atom " [:code "click-count"] " has value: "
-   @click-count ". "
-   [:input {:type "button" :value "Click me!"
-            :on-click #(swap! click-count inc)}]])
+(def dropdown-options [{:title "One" :value "One"}
+                       {:title "Two" :value "Two"}
+                       {:title "Three" :value "Three"}])
 
-(def click-count (r/atom 0))
 
 (defn hello []
-  [:<>
-   [:p "Hello, carbon-cljs is running!"]
-   [:p "Here's an example of using a component with state:"]
-   [click-counter click-count]])
+  (let [checkbox-state (r/atom false)]
+    (fn [] [:<>
+            [file-uploader/file-uploader {:label "Upload file"
+                                          :description "Max 500mb file"
+                                          :on-change #(js/console.log (-> % .-target .-files (aget 0) .-name))
+                                          :button-text "Drag and drop files here or upload"
+                                          }]
+            [:hr]
+            [:p (str @checkbox-state)]
+            [checkbox/checkbox {:label "Test Check 1"
+                                :on-change #(reset! checkbox-state (-> % .-target .-checked))}]
+            [:hr]
+            [dropdown/dropdown {:on-select #(js/console.log %)
+                                :label "Dropdown text"
+                                :error? true
+                                :inline? true
+                                :error-text "This field is required"
+                                :options dropdown-options
+                                :dropdown-button-text "Options mike"}]])))
